@@ -5,6 +5,9 @@
 # Repo    : https://github.com/martin-rizzo/CheckpointTools
 # License : MIT
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#                              CheckpointTools
+#      CLI tools for inspecting and manipulating model checkpoint files
+#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #
 #  Each subdirectory in the project should have its own `meson.build` file
 #  to add to app_dirs and app_sources its directory and source files.
@@ -16,9 +19,9 @@
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 project(
-    'checkpointtools',               # Project name
+    'checkpointtools',             # Project name
     'cpp',                         # Primary language
-    version: '0.0.1',              # Project version
+    version: '0.0.2',              # Project version
     default_options: [             # Default options for the project
         'cpp_std=c++20',           # Use C++20 standard  (libtorch requires C++20)
         'warning_level=3',         # Warning level: 3 (many warnings)
@@ -60,8 +63,10 @@ subdir( 'src' / 'ckview' )
 
 # Define Checkpoint Tools executables and their dependencies.
 executable(
-    'ckview',
-    app_sources,
-    include_directories: app_dirs,
-    #dependencies      : [ tensorinfo_dep ],
+    'ckview',                                # Executable name
+    app_sources,                             # Source files for compilation
+    include_directories: app_dirs,           # Include dirs for compilation
+    #dependencies      : [ tensorinfo_dep ], # Dependencies for the executable
+    install            : true,               # true = it should be installed when running 'meson install'
+    install_dir        : 'bin',              # directory under prefix where to install the executable
 )
