@@ -43,23 +43,25 @@ jobs:
         # en un directorio temporal, listo para ser empaquetado.
         run: meson install -C builddir/ --destdir ${{ github.workspace }}/output_package/
 
+
       - name: Create Zip Archive (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
-          # Nombre del archivo zip, usando el nombre del repo, el tag de la release, OS y arquitectura.
-          # Esto ayuda a identificar el artefacto claramente.
           ZIP_NAME="${{ github.event.repository.name }}-${{ github.event.release.tag_name }}-${{ matrix.os }}-${{ runner.arch }}.zip"
+          echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
           cd ${{ github.workspace }}/output_package/
-          zip -r "../${ZIP_NAME}" ./*
-          echo "ZIP_FILE_PATH=${{ github.workspace }}/${ZIP_NAME}" >> $GITHUB_ENV
+          zip -r "../$ZIP_NAME" ./*
+          echo "ZIP_FILE_PATH=${{ github.workspace }}/$ZIP_NAME" >> $GITHUB_ENV
+
 
       - name: Create Zip Archive (Windows)
         if: runner.os == 'Windows'
         run: |
           $ZIP_NAME = "${{ github.event.repository.name }}-${{ github.event.release.tag_name }}-${{ matrix.os }}-${{ runner.arch }}.zip"
-          # Compilamos el contenido de 'output_package' en un archivo zip.
+          echo "ZIP_NAME=$ZIP_NAME" | Out-File -FilePath $env:GITHUB_ENV -Append
           Compress-Archive -Path "${{ github.workspace }}\output_package\*" -DestinationPath "${{ github.workspace }}\$ZIP_NAME"
           echo "ZIP_FILE_PATH=${{ github.workspace }}\$ZIP_NAME" | Out-File -FilePath $GITHUB_ENV -Append
+
 
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
