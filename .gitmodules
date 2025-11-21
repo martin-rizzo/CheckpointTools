@@ -1,0 +1,3 @@
+[submodule "dependencies/TensorInfo"]
+	path = dependencies/TensorInfo
+	url = https://github.com/martin-rizzo/TensorInfo.git

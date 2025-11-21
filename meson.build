@@ -47,8 +47,9 @@ add_project_arguments(['-Wno-unused-parameter'], language : 'cpp')
 # (subprojects are defined in the `dependencies` directory)
 
 # TensorInfo: https://github.com/martin-rizzo/TensorInfo
-# TODO: get the current TensorInfo subproject as dependency
-#tensoinfo_dep = subproject('TensorInfo').get_variable('tensorinfo_dep')
+tensorinfo_proj = subproject('TensorInfo')
+tensorinfo_static_dep = tensorinfo_proj.get_variable('tensorinfo_static_dep')
+tensorinfo_shared_dep = tensorinfo_proj.get_variable('tensorinfo_shared_dep')
 
 
 
@@ -56,17 +57,35 @@ add_project_arguments(['-Wno-unused-parameter'], language : 'cpp')
 ## //////////////////// Checkpoint Tools Executables ///////////////////// ##
 ##=========================================================================##
 
-# Scan source directory for C++ files and subdirectories.
+# Scan "common" source files and subdirectories
 app_dirs    = [ ]
 app_sources = [ ]
-subdir( 'src' / 'ckview' )
+subdir( 'src' / 'common' )
+common_dirs    = app_dirs
+common_sources = app_sources
 
-# Define Checkpoint Tools executables and their dependencies.
+# Scan "ckshow" source files and subdirectories and build an executable
+app_dirs    = [ ]
+app_sources = [ ]
+subdir( 'src' / 'ckshow' )
 executable(
-    'ckview',                                # Executable name
-    app_sources,                             # Source files for compilation
-    include_directories: app_dirs,           # Include dirs for compilation
-    #dependencies      : [ tensorinfo_dep ], # Dependencies for the executable
-    install            : true,               # true = it should be installed when running 'meson install'
-    install_dir        : 'bin',              # directory under prefix where to install the executable
+    'ckshow',                                    # Executable name
+    app_sources + common_sources,                # Source files for compilation
+    include_directories: app_dirs + common_dirs, # Include dirs for compilation
+    dependencies: [ tensorinfo_static_dep ],     # Dependencies for the executable
+    install     : true,                          # true = it should be installed when running 'meson install'
+    install_dir : 'bin',                         # directory under prefix where to install the executable
+)
+
+#Scan "ckskeletonize" source files and subdirectories and build an executable
+app_dirs    = [ ]
+app_sources = [ ]
+subdir( 'src' / 'ckskeletonize' )
+executable(
+    'ckskeletonize',                             # Executable name
+    app_sources + common_sources,                # Source files for compilation
+    include_directories: app_dirs + common_dirs, # Include dirs for compilation
+    dependencies: [ tensorinfo_static_dep ],     # Dependencies for the executable
+    install     : true,                          # true = it should be installed when running 'meson install'
+    install_dir : 'bin',                         # directory under prefix where to install the executable
 )

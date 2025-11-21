@@ -8,5 +8,6 @@
 #subdir('<none>')
 app_dirs    += include_directories('.')
 app_sources += files(
-    'main.cpp',
+    'colors.cpp',
+    'messages.cpp',
 )
