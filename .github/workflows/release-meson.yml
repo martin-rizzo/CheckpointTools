@@ -16,11 +16,20 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
-            # meson_version: "1.4.0"
-          # Descomenta las siguientes líneas si quieres habilitar Windows/Mac
-          # - os: windows-latest
+          # --- Configuración para Ubuntu ---
+          - os: ubuntu-22.04
+            zip_prefix: checkpoint-tools-linux
+            zip_arch: x64
+          
+          # --- Configuración futura para Windows (Descomentar luego) ---
+          - os: windows-2022
+            zip_prefix: checkpoint-tools-win
+            zip_arch: x64
+
+          # --- Configuración futura para macOS (Descomentar luego) ---
           # - os: macos-latest
+          #   zip_prefix: checkpoint-tools-macOS
+          #   zip_arch: arm64          
 
     steps:
       - name: Checkout code
@@ -49,8 +58,7 @@ jobs:
       - name: Create Zip Archive (Unix)
         if: runner.os != 'Windows'
         run: |
-          # Usamos github.ref_name para obtener el tag (ej: v1.0.0)
-          ZIP_NAME="${{ github.event.repository.name }}-${{ github.ref_name }}-${{ matrix.os }}-${{ runner.arch }}.zip"
+          ZIP_NAME="${{ matrix.zip_prefix }}-${{ github.ref_name }}-${{ matrix.zip_arch }}.zip"
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
           
           cd "${{ github.workspace }}/output_package/"
@@ -63,8 +71,7 @@ jobs:
       - name: Create Zip Archive (Windows)
         if: runner.os == 'Windows'
         run: |
-          # Usamos github.ref_name para obtener el tag
-          $ZIP_NAME = "${{ github.event.repository.name }}-${{ github.ref_name }}-${{ matrix.os }}-${{ runner.arch }}.zip"
+          $ZIP_NAME = "${{ matrix.zip_prefix }}-${{ github.ref_name }}-${{ matrix.zip_arch }}.zip"
           
           # Ruta destino
           $DEST_PATH = "${{ github.workspace }}\$ZIP_NAME"
