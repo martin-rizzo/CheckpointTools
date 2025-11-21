@@ -11,7 +11,8 @@ jobs:
     strategy:
       matrix:
         # Definimos los sistemas operativos para los que queremos compilar
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest]
+        #, macos-latest, windows-latest]
         # Para releases, es común usar una versión específica y estable de Meson.
         # Quitamos la iteración de versiones para simplificar el artefacto final.
         # Puede ajustar "1.4.0" a la versión de Meson que prefiera.
