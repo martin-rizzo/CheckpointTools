@@ -1,5 +1,11 @@
 name: Release Build & Package with Meson
 
+permissions:
+  contents: write  # For uploading assets, commits, releases, etc.
+  # Add additional permissions if your job needs them, e.g.:
+  # issues: write
+  # pull-requests: write
+
 on:
   release:
     types: [published] # Este workflow se ejecutará cuando se publique una nueva release (o un nuevo tag asociado a una release)
