@@ -33,9 +33,10 @@
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}" .sh)         # script name without extension
 SCRIPT_DIR=$(realpath "$(dirname "${BASH_SOURCE[0]}")") # script directory
 PROJECT_DIR=$SCRIPT_DIR             # project directory
+PROJECT_NAME="CheckpointTools"      # project name (used in packages)
 VERSION_FILE="VERSION"              # file containing project version number
-RELEASE_BRANCH='master'             # the branch used for releases (tags)
-RELEASE_DIR='/tmp/CheckpointTools'  # local release directory
+RELEASE_BRANCH="master"             # the branch used for releases (tags)
+RELEASE_DIR="/tmp/$PROJECT_NAME"    # local release directory
 HELP="
 Usage: ./$SCRIPT_NAME.sh [COMMAND] [OPTIONS]
 
@@ -246,7 +247,7 @@ create_git_tag() {
                        "Maybe you need to increase the version in 'VERSION' file."
 
     echo "Creating Git tag: '$tag_name'..."
-    git tag -a "$tag_name" -m "Release $tag_name" \
+    git tag -a "$tag_name" -m "$PROJECT_NAME $tag_name\n\nAutomatic tag for release $version." \
         || fatal_error "Failed to create Git tag."
     echo "Git tag '$tag_name' created locally."
 

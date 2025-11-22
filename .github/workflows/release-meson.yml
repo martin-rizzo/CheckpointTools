@@ -58,7 +58,7 @@ jobs:
         run: python -m pip install meson ninja
 
       - name: Configure Project
-        run: meson setup builddir/
+        run: meson setup builddir/ --buildtype release -Ddebug=false -Doptimization=2 -Dstrip=true -Dwerror=true
 
       - name: Compile Project
         run: meson compile -C builddir/
