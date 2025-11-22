@@ -232,7 +232,9 @@ clean_project() {
 #
 create_git_tag() {
     local version=$1
-    local tag_name="v$version" current_branch
+    local tag_name="v$version"
+    local tag_message=$(printf "%s %s\n\nAutomatic tag for release %s" "$PROJECT_NAME" "$tag_name" "$version")
+    local current_branch
 
     echo "Checking if current branch is master/main..."
     current_branch=$(git rev-parse --abbrev-ref HEAD)
@@ -247,7 +249,7 @@ create_git_tag() {
                        "Maybe you need to increase the version in 'VERSION' file."
 
     echo "Creating Git tag: '$tag_name'..."
-    git tag -a "$tag_name" -m "$PROJECT_NAME $tag_name\n\nAutomatic tag for release $version." \
+    git tag -a "$tag_name" -m "$tag_message" \
         || fatal_error "Failed to create Git tag."
     echo "Git tag '$tag_name' created locally."
 
