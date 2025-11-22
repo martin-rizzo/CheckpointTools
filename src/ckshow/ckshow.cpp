@@ -1,5 +1,5 @@
 /*
-| File    : ckshow_command.cpp
+| File    : ckshow.cpp
 | Purpose : The `ckshow` command line tool.
 | Author  : Martin Rizzo | <martinrizzo@gmail.com>
 | Date    : Nov 20, 2025
@@ -12,32 +12,7 @@
 #include <tin/tensormap.h>
 #include "colors.h"
 #include "messages.h"
-#include "ckshow_command.h"
-static const char HELP[]=R"(
-Usage: ckshow [OPTIONS] file
-
-  Allows you to compile and manage the OpenDiffusion project in Linux.
-
-  OPTIONS:
-    -n, --name <NAME>      Show the value of a tensor (or metadata) with the given key. e.g. 'model.layer.1.bias'
-    -m, --metadata         Print metadata information related to the checkpoint file
-    -p, --prefix <PREFIX>  Filter the tensor names by a prefix to display only matching tensors
-    -d, --depth <DEPTH>    Specify the depth level of the hierarchical index to display
-    --thumbnail            Extract the thumbnail from the .safetensors file and save it as a .jpg image
-
-  Output formats:
-    -u, --human            Output in a human-readable format with clear formatting (default)
-    -b, --basic            Output in a plain, easily parseable format for scripts or tools
-    -j, --json             Output data in JSON format when available
-
-    --nc, --no-color       Disable color output.
-    -h  , --help           Show this help message and exit.
-
-  Examples:
-    ckshow --prefix model.layer.1.bias 'checkpoint.safetensors'
-    ckshow --no-color 'checkpoint.safetensors'
-)";
-
+#include "ckshow.h"
 #ifdef _WIN32
     inline bool is_terminal_output() { return true; }
 #else
@@ -50,19 +25,24 @@ using namespace tin;
 
 //============================= CONSTRUCTION ==============================//
 
-CkShowCommand::CkShowCommand(const CkShowArgs& args)
+CkShow::CkShow(const CkShowArgs& args)
 : _args(args)
 {}
 
 //================================ HELPERS ================================//
 
 void
-CkShowCommand::print_help() {
-    std::cout << HELP << std::endl;
+CkShow::print_help() const noexcept {
+    std::cout << _args.help_message  << std::endl;
 }
 
 void
-CkShowCommand::fatal_read_error(ReadError readError) {
+CkShow::print_version() const noexcept {
+    std::cout << "ckshow (CheckpointTools ckshow) " << PROJECT_VERSION << std::endl;
+}
+
+void
+CkShow::fatal_read_error(ReadError readError) {
     switch(readError) {
         case ReadError::FileNotFound:
             Messages::fatal_error("File not found.");
@@ -96,7 +76,7 @@ CkShowCommand::fatal_read_error(ReadError readError) {
 //============================== SUBCOMMANDS ==============================//
 
 void
-CkShowCommand::list_tensors_columns(const TensorMap& tensorMap) const {
+CkShow::list_tensors_columns(const TensorMap& tensorMap) const {
     auto sortedTensors = tensorMap.collect_tensors(SortBy::NAME_AND_INDEX);
 
     size_t nameMaxLen = 0, shapeMaxLen = 0;
@@ -116,7 +96,7 @@ CkShowCommand::list_tensors_columns(const TensorMap& tensorMap) const {
 }
 
 void
-CkShowCommand::list_tensors_csv(const TensorMap& tensorMap, bool includeHeader /* = true */) const {
+CkShow::list_tensors_csv(const TensorMap& tensorMap, bool includeHeader /* = true */) const {
     auto sortedTensors = tensorMap.collect_tensors(SortBy::NAME_AND_INDEX);
     if(includeHeader) {
         std::cout << "name,shape,dtype" << std::endl;
@@ -128,7 +108,7 @@ CkShowCommand::list_tensors_csv(const TensorMap& tensorMap, bool includeHeader /
 }
 
 void
-CkShowCommand::list_metadata(const TensorMap& tensorMap) const {
+CkShow::list_metadata(const TensorMap& tensorMap) const {
     std::cout << "Metadata:" << std::endl;
     for(auto& it : tensorMap.metadata()) {
         std::cout << "  " << it.first << ": " << it.second.as_string() << std::endl;
@@ -136,25 +116,28 @@ CkShowCommand::list_metadata(const TensorMap& tensorMap) const {
 }
 
 void
-CkShowCommand::print_metadata(const TensorMap& tensorMap, const std::string& key) const {
+CkShow::print_metadata(const TensorMap& tensorMap, StringView key) const {
     std::cout << tensorMap.metadata().get(key).as_string() << std::endl;
 }
 
 //================================ RUNNING ================================//
 
 int
-CkShowCommand::run() {
+CkShow::run() {
     ReadError readError;
 
     // determine if we should use color output
     bool use_color = _args.use_color == UseColor::ALWAYS ||
                      (_args.use_color == UseColor::AUTO && is_terminal_output());
-    if(!use_color) {
+    if( !use_color ) {
         Colors::instance().disable_colors();
     }
 
     // if help was requested, show the help message and exit
-    if(_args.help) { print_help(); return 0; }
+    if( _args.help ) { print_help(); return 0; }
+
+    // if version was requested, show the version and exit
+    if( _args.version ) { print_version(); return 0; }
 
     // if the user didn't provide any file, show an error message and exit
     if(_args.filename.empty()) {

@@ -13,14 +13,14 @@
 #ifndef CKSHOW_ARGS_H_
 #define CKSHOW_ARGS_H_
 #include <iostream>
-#include <string>
+#include "common.h"
 
 enum class Command {
     LIST_TENSORS,
     LIST_METADATA,
     EXTRACT_THUMBNAIL
 };
-inline std::string
+inline String
 to_string(Command command) {
     switch (command) {
         case Command::LIST_TENSORS     : return "Command::LIST_TENSORS";
@@ -81,6 +81,8 @@ public:
     Format format = Format::HUMAN;         ///< Output format
     UseColor use_color = UseColor::AUTO;   ///< Whether to use color in output
     bool help = false;                     ///< true = print usage and exit
+    bool version = false;                  ///< true = print version and exit
+    const char * const help_message;
 };
 
 std::ostream& operator<<(std::ostream& os, const CkShowArgs& args);

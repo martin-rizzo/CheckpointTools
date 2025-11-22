@@ -9,6 +9,6 @@
 app_dirs    += include_directories('.')
 app_sources += files(
     'ckshow_args.cpp',
-    'ckshow_command.cpp',
+    'ckshow.cpp',
     'main.cpp',
 )

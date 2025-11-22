@@ -42,7 +42,33 @@ to_string(bool value) {
  * @param argv An array of C strings representing the command line arguments.
  */
 CkShowArgs::CkShowArgs(int argc, char* argv[])
+: help_message{R"(
+Usage: ckshow [OPTIONS] file
+
+  Allows you to compile and manage the OpenDiffusion project in Linux.
+
+  OPTIONS:
+    -n, --name <NAME>      Show the value of a tensor (or metadata) with the given key. e.g. 'model.layer.1.bias'
+    -m, --metadata         Print metadata information related to the checkpoint file
+    -p, --prefix <PREFIX>  Filter the tensor names by a prefix to display only matching tensors
+    -d, --depth <DEPTH>    Specify the depth level of the hierarchical index to display
+    --thumbnail            Extract the thumbnail from the .safetensors file and save it as a .jpg image
+
+  Output formats:
+    -u, --human            Output in a human-readable format with clear formatting (default)
+    -b, --basic            Output in a plain, easily parseable format for scripts or tools
+    -j, --json             Output data in JSON format when available
+
+    --nc, --no-color       Disable color output.
+    -h  , --help           Show this help message and exit.
+    -v  , --version        Show version information and exit.
+
+  Examples:
+    ckshow --prefix model.layer.1.bias 'checkpoint.safetensors'
+    ckshow --no-color 'checkpoint.safetensors'
+)"}
 {
+
     for( int i=1 ; i < argc ; ++i ) {
         std::string_view arg{ argv[i] };
         std::string_view nextarg{ (i+1) < argc && argv[i+1][0] != '-' ? argv[i+1] : "" };
@@ -50,18 +76,19 @@ CkShowArgs::CkShowArgs(int argc, char* argv[])
         // parse the flags arguments
         if( arg.starts_with('-') ) {
         //-OPTIONS:
-            if     ( arg=="-n" || arg=="--name"     ) { name = nextarg; ++i; }
-            else if( arg=="-m" || arg=="--metadata" ) { command = Command::LIST_METADATA; }
-            else if(              arg=="--thumbnail") { command = Command::EXTRACT_THUMBNAIL; }
-            else if( arg=="-p" || arg=="--prefix"   ) { prefix = nextarg; ++i; }
-            else if( arg=="-d" || arg=="--depth"    ) { depth  = to_integer(nextarg); ++i; }
+            if     ( arg=="-n"  || arg=="--name"     ) { name = nextarg; ++i; }
+            else if( arg=="-m"  || arg=="--metadata" ) { command = Command::LIST_METADATA; }
+            else if(               arg=="--thumbnail") { command = Command::EXTRACT_THUMBNAIL; }
+            else if( arg=="-p"  || arg=="--prefix"   ) { prefix = nextarg; ++i; }
+            else if( arg=="-d"  || arg=="--depth"    ) { depth  = to_integer(nextarg); ++i; }
         //-FORMATS:
-            else if( arg=="-u" || arg=="--human"    ) { format = Format::HUMAN; }
-            else if( arg=="-b" || arg=="--basic"    ) { format = Format::PLAIN; }
-            else if( arg=="-j" || arg=="--json"     ) { format = Format::JSON; }
+            else if( arg=="-u"  || arg=="--human"    ) { format = Format::HUMAN; }
+            else if( arg=="-b"  || arg=="--basic"    ) { format = Format::PLAIN; }
+            else if( arg=="-j"  || arg=="--json"     ) { format = Format::JSON; }
         //-EXTRA:
-            else if( arg=="--nc" || arg=="--no-color" ) { use_color = UseColor::NEVER; }
-            else if( arg=="-h"   || arg=="--help"     ) { help = true; }
+            else if( arg=="--nc"|| arg=="--no-color" ) { use_color = UseColor::NEVER; }
+            else if( arg=="-h"  || arg=="--help"     ) { help = true; }
+            else if( arg=="-v"  || arg=="--version"  ) { version = true; }
             else {
                 Messages::fatal_error( std::format("Unknown argument: {}", arg), {
                     "Try `ckshow --help` for more information."

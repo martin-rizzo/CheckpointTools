@@ -1,0 +1,48 @@
+/*
+| File    : common.h.in
+| Purpose : Common types and constants used throughout the project.
+|           (this file is a template to be used by Meson to generate the actual header file)
+| Author  : Martin Rizzo | <martinrizzo@gmail.com>
+| Date    : Nov 21, 2025
+| Repo    : https://github.com/martin-rizzo/CheckpointTools
+| License : MIT
+|- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+|                              CheckpointTools
+|      CLI tools for inspecting and manipulating model checkpoint files
+\_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _*/
+#pragma once
+#ifndef CONFIG_H_
+#define CONFIG_H_
+#include <string>       // for std::string
+#include <string_view>  // for std::string_view
+
+
+// Defined by Meson: the project name
+#define PROJECT_NAME "@PROJECT_NAME@"
+
+// Defined by Meson: the full project version as a string
+#define PROJECT_VERSION "@PROJECT_VERSION@"
+
+// Defined by Meson: the major, minor and patch versions separately
+#define PROJECT_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define PROJECT_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define PROJECT_VERSION_PATCH @PROJECT_VERSION_PATCH@
+
+/*================================= SIMPLE-CODE ALIASES ==================================================
+  A set of template aliases to simplify code's visual appearance (?)
+ +----------------+---------------------------------------------------------+---------------------------+
+ | SIMPLE-CODE    | Description                                             | Implemented using         |
+ | -------------- | ------------------------------------------------------- | ------------------------- |
+ | String         | A string of characters.                                 | `std::string`             |
+ | StringView     | A lightweight view of a string.                         | `std::string_view`        |
+*/
+
+/** A sequence of characters. */
+using String = std::string;
+
+/** A lightweight view of a string. (implemented using std::string_view) */
+using StringView = std::string_view;
+
+
+
+#endif // CONFIG_H_

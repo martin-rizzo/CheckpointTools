@@ -10,14 +10,10 @@
 |      CLI tools for inspecting and manipulating model checkpoint files
 \_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _*/
 #include "ckshow_args.h"
-#include "ckshow_command.h"
-
-//=========================================================================//
-// //////////////////////////////// MAIN ///////////////////////////////// //
-//=========================================================================//
+#include "ckshow.h"
 
 int main(int argc, char* argv[]) {
-    CkShowArgs    args{argc, argv};
-    CkShowCommand command{args};
-    return command.run();
+    CkShowArgs args{argc, argv};
+    CkShow     ckshow{args};
+    return ckshow.run();
 }
