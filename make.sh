@@ -32,28 +32,33 @@
 #_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}" .sh)         # script name without extension
 SCRIPT_DIR=$(realpath "$(dirname "${BASH_SOURCE[0]}")") # script directory
-PROJECT_DIR=$SCRIPT_DIR                                 # project directory
-RELEASE_DIR='/tmp/CheckpointTools'                      # release directory
+PROJECT_DIR=$SCRIPT_DIR             # project directory
+VERSION_FILE="VERSION"              # file containing project version number
+RELEASE_BRANCH='master'             # the branch used for releases (tags)
+RELEASE_DIR='/tmp/CheckpointTools'  # local release directory
 HELP="
 Usage: ./$SCRIPT_NAME.sh [COMMAND] [OPTIONS]
 
   Allows you to compile and manage the 'CheckpointTools' project in Linux environments.
 
-  Available command:
+  Available commands:
     build        Build the project (default)
     rebuild      Rebuild the project from scratch
+    release      Build a release version locally in '${RELEASE_DIR}'
+    deploy       Build, tag, and publish a new release version on GitHub
     clean        Clean the build directory
-    release      Build the release version in: ${RELEASE_DIR}
 
   Available options:
-    -l, --error-limit [N]  Maximum number of errors to show (default 30 if 'N' is empty)
-    -n, --no-color         Disable color output.
-    -h, --help             Show this help message and exit.
+    -l, --error-limit [N]   Maximum number of errors to show (default 30 if N is empty)
+    -n, --no-color          Disable color output
+    -h, --help              Show this help message and exit.
 
-  Examples:
-    $SCRIPT_NAME clean
-    $SCRIPT_NAME --no-color build
+  Examples: 
+    $SCRIPT_NAME.sh clean
+    $SCRIPT_NAME.sh --no-color build
 "
+
+
 
 # ANSI escape codes for colored terminal output
 RED='\e[91m'; YELLOW='\e[93m'; GREEN='\e[92m'; CYAN='\e[96m'; RESET='\e[0m'
@@ -110,8 +115,24 @@ remove_release_dir() {
     echo "Release directory deleted."
 }
 
-#================================ COMMANDS =================================#
+# Print the current project version number
+#
+# Usage:
+#   get_project_version
+#
+# Parameters:
+#   This function uses two global variables:
+#    - PROJECT_DIR: The full path to the root directory of the project.
+#    - VERSION_FILE: The name of the file containing the version number.
+#
+get_project_version() {
+    if [[ ! -f "$PROJECT_DIR/$VERSION_FILE" ]]; then
+        fatal_error "File '$VERSION_FILE' not found in the root of the project."
+    fi
+    cat "$PROJECT_DIR/$VERSION_FILE" | tr -d '\n\r '
+}
 
+#================================ COMMANDS =================================#
 
 # Builds the CheckpointTools project using the Meson build system.
 #
@@ -147,7 +168,6 @@ build_project() {
 
 }
 
-
 # Builds the release version of CheckpointTools project using Meson.
 #
 # Usage:
@@ -164,7 +184,7 @@ build_project() {
 #   - The `PROJECT_DIR` variable should point to the root of the project directory.
 #   - The `RELEASE_DIR` variable should specify where the release files will be installed.
 #
-release_project() {
+build_release() {
     local release_args=(
         --buildtype release
         -Ddebug=false
@@ -178,7 +198,6 @@ release_project() {
     echo "Release version built successfully."
     echo "Release files are located in ${RELEASE_DIR}"
 }
-
 
 # Cleans the project by removing build and release directories.
 #
@@ -197,16 +216,57 @@ clean_project() {
     remove_release_dir
 }
 
+# Creates a Git tag for the project based on its version.
+#
+# Usage:
+#   create_git_tag <VERSION>
+#
+# Parameters:
+#   <VERSION>: The version number used to create the Git tag. It should follow
+#              semantic versioning "MAJOR.MINOR.PATCH" format. Example: "1.0.0".
+#
+# Requirements:
+#   - Git must be installed and properly configured with access to the project's repository.
+#   - The 'RELEASE_BRANCH' variable should point to the branch used for releases (e.g., "master").
+#
+create_git_tag() {
+    local version=$1
+    local tag_name="v$version" current_branch
+
+    echo "Checking if current branch is master/main..."
+    current_branch=$(git rev-parse --abbrev-ref HEAD)
+
+    if [[ "$current_branch" != "$RELEASE_BRANCH" ]]; then
+        fatal_error "You are not on the '$RELEASE_BRANCH' branch." \
+                    "Please switch to '$RELEASE_BRANCH' branch before creating a release."
+    fi
+
+    git rev-parse --verify --quiet "$tag_name" \
+        && fatal_error "The tag '$tag_name' already exists" \
+                       "Maybe you need to increase the version in 'VERSION' file."
+
+    echo "Creating Git tag: '$tag_name'..."
+    git tag -a "$tag_name" -m "Release $tag_name" \
+        || fatal_error "Failed to create Git tag."
+    echo "Git tag '$tag_name' created locally."
+
+    echo "Pushing the tag '$tag_name' to remote repository..."
+    git push origin "$tag_name" \
+        || fatal_error "Failed to push the tag '$tag_name' to remote repository."
+    echo "Git tag '$tag_name' pushed successfully."
+}
 
 # #===========================================================================#
 # #////////////////////////////////// MAIN ///////////////////////////////////#
 # #===========================================================================#
 main() {
 
-    local no_color=false   # no color mode flag
-    local help=false       # help mode flag
-    local command="build"  # default command to execute
-    local error_limit=''   # no error limit
+    local no_color=false     # no color mode flag
+    local show_help=false    # show help flag
+    local show_version=false # show version flag
+    local command="build"    # default command to execute
+    local error_limit=''     # no error limit
+    local version=$(get_project_version)
 
     while [[ $# -gt 0 ]]; do
         if [[ $1 == -* ]]; then
@@ -218,8 +278,9 @@ main() {
                         error_limit=30 #< default error limit if -l without argument
                     fi
                 ;;
-                -n|--nc|--no-color) no_color=true           ;;
-                -h|--help)          help=true               ;;
+                -n|--nc|--no-color) no_color=true     ;;
+                -h|--help)          show_help=true    ;;
+                -v|--version)       show_version=true ;;
                 *)
                     fatal_error "Invalid option: \"$1\"" "Use --help for usage." ;;
             esac
@@ -233,14 +294,18 @@ main() {
     if [[ $no_color == true ]]; then disable_color; fi
 
     # display help message and exit if --help option is provided
-    if [[ $help == true ]]; then help; exit 0; fi
+    if [[ $show_help == true ]]; then help; exit 0; fi
+
+    # display project version and exit
+    if [[ $show_version == true ]]; then echo "$version"; exit 0; fi
 
     # execute the specified command
     case $command in
         build|all)  build_project "$error_limit" ; exit 0 ;;
-        clean)      clean_project                ; exit 0 ;;
         rebuild)    clean_project; build_project ; exit 0 ;;
-        release)    release_project              ; exit 0 ;;
+        release)    build_release                ; exit 0 ;;
+        deploy)     create_git_tag "$version"    ; exit 0 ;;
+        clean)      clean_project                ; exit 0 ;;
         library)    fatal_error "Not implemented yet." ;;
         tools)      fatal_error "Not implemented yet." ;;
         *)          fatal_error "Invalid command: \"$command\"" "Use --help for usage." ;;
