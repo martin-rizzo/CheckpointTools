@@ -14,14 +14,15 @@
 #define CKSHOW_ARGS_H_
 #include <iostream>
 #include "common.h"
+#include "args.h"
+
 
 enum class Command {
     LIST_TENSORS,
     LIST_METADATA,
     EXTRACT_THUMBNAIL
 };
-inline String
-to_string(Command command) {
+inline String to_string(Command command) {
     switch (command) {
         case Command::LIST_TENSORS     : return "Command::LIST_TENSORS";
         case Command::LIST_METADATA    : return "Command::LIST_METADATA";
@@ -30,13 +31,13 @@ to_string(Command command) {
     }
 }
 
+
 enum class Format {
     HUMAN,
     PLAIN,
     JSON
 };
-inline std::string
-to_string(Format format) {
+inline String to_string(Format format) {
     switch (format) {
         case Format::HUMAN: return "Format::HUMAN";
         case Format::PLAIN: return "Format::PLAIN";
@@ -46,7 +47,7 @@ to_string(Format format) {
 }
 
 
-struct CkShowArgs
+struct CkShowArgs : public Args
 {
 // CONSTRUCTION/DESTRUCTION
 public:

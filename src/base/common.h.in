@@ -52,6 +52,7 @@ using StringPair = std::pair<String, String>;
 /** A lightweight view of a string pair.*/
 using StringViewPair = std::pair<StringView, StringView>;
 
+
 /**
  * Converts a boolean value to its corresponding string representation.
  *
@@ -60,6 +61,17 @@ using StringViewPair = std::pair<StringView, StringView>;
  */
 [[nodiscard]] constexpr inline StringView
 to_string(bool value) { return value ? "true" : "false"; }
+
+
+/**
+ * Converts a string to an integer.
+ *
+ * @param str          The input string to be converted to an integer.
+ * @param defaultValue The value to return if the conversion fails. Default is 0.
+ * @return The integer value of the string, or the default value if the
+ *         string cannot be converted to an integer.
+ */
+[[nodiscard]] int to_integer(StringView str, int defaultValue = 0);
 
 
 #endif // CONFIG_H_

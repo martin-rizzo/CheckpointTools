@@ -16,77 +16,6 @@
 #include "ckshow_args.h"
 #include "messages.h"
 
-//================================ HELPERS ================================//
-
-static int
-to_integer(StringView str, int defaultValue = 0) {
-    int result;
-    auto end = str.data() + str.length();
-    auto resultInfo = std::from_chars(str.data(), end, result);
-    return resultInfo.ec == std::errc{} ? result : defaultValue;
-}
-
-/**
- * Parses an option from the command-line arguments.
- * 
- * This function parses an option from the command-line arguments. It handles
- * the different formats in which an option can be specified, such as:
- * - `--option=value` (the code must call `get_value`)
- * - `--option value` (the code must call `get_value`)
- * - `--option`
- *
- * @param i    The index of the argument to parse as an option.
- * @param argc The total number of arguments passed in the command line.
- * @param argv The array of argument strings passed in the command line.
- * @return
- *     A pair containing the parsed option and its associated value, if any.
- */
-static StringViewPair
-parseOption(int i, int argc, char* argv[]) {
-
-    // by default, assume the associated value is the next argument
-    StringView curr{ argv[i] };
-    StringView value{ (i+1) < argc && argv[i+1][0] != '-' ? argv[i+1] : "" };
-
-    // if the option starts with "--" and contains an "=",
-    // extract the value (including the "=")
-    if( curr.starts_with("--") ) {
-        if( auto it = curr.find('='); it != StringView::npos) {
-            value = curr.substr(it);
-            curr  = curr.substr(0, it);
-        }
-    }
-    // if the option does not start with "--", assume no associated value
-    else { value = ""; }
-    return StringViewPair{ curr, value };
-}
-
-/**
- * Returns the value associated with an option, handling embedded or separate values.
- *
- * This function processes the value part of an option pair. If the value
- * was embedded in the option (e.g., --option=value), it extracts the value
- * portion after the equal sign. If the value was provided as a separate argument,
- * it advances the argument index and returns the next argument as the value.
- *
- * @param option A reference to the option pair containing the option and its value.
- * @param i      A reference to the argument index, which will be advanced if needed.
- * @return
- *    The extracted value associated with the option.
- */
-static StringView
-get_value(StringViewPair& option, int& i) {
-    StringView value = option.second;
-
-    // if the value starts with "=", extract the portion after "="
-    if( value.starts_with('=') ) { value = value.substr(1); }
-    // if no leading '=', assume value was provided as a separate argument and advance 'i'
-    else { i++; }
-
-    // clear the option's second element to indicate the value has been processed
-    option.second = "";
-    return value;
-}
 
 //============================= CONSTRUCTION ==============================//
 
@@ -130,8 +59,8 @@ Usage: ckshow [OPTIONS] file
 {
     for( int i=1 ; i < argc ; ++i )
     {
-        auto option = parseOption(i, argc, argv);
-        auto arg    = option.first;
+        auto option = parse_option(i, argc, argv);
+        auto arg    = get_name(option,i);
 
         // parse the flags arguments
         if( arg.starts_with('-') ) {
