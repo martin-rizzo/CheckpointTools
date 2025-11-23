@@ -126,10 +126,12 @@ int
 CkShow::run() {
     ReadError readError;
 
-    // determine if we should use color output
-    bool use_color = _args.use_color == UseColor::ALWAYS ||
-                     (_args.use_color == UseColor::AUTO && is_terminal_output());
-    if( !use_color ) {
+    // if the color option is set to "auto", disable colors when outputting to a non-terminal
+    if( _args.when_color == "auto" || _args.when_color == "tty" || _args.when_color == "if-tty" ) {
+        if( !is_terminal_output() ) { Colors::instance().disable_colors(); }
+    }
+    // if the color option is set to "never", disable colors regardless of output type
+    else if ( _args.when_color == "never" || _args.when_color == "no" || _args.when_color == "none") {
         Colors::instance().disable_colors();
     }
 

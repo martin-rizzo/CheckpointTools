@@ -15,6 +15,7 @@
 #define CONFIG_H_
 #include <string>       // for std::string
 #include <string_view>  // for std::string_view
+#include <utility>      // for std::pair
 
 
 // Defined by Meson: the project name
@@ -30,19 +31,35 @@
 
 /*================================= SIMPLE-CODE ALIASES ==================================================
   A set of template aliases to simplify code's visual appearance (?)
- +----------------+---------------------------------------------------------+---------------------------+
- | SIMPLE-CODE    | Description                                             | Implemented using         |
- | -------------- | ------------------------------------------------------- | ------------------------- |
- | String         | A string of characters.                                 | `std::string`             |
- | StringView     | A lightweight view of a string.                         | `std::string_view`        |
+ +----------------+---------------------------------------------------------+------------------------------+
+ | SIMPLE-CODE    | Description                                             | Implemented using            |
+ | -------------- | ------------------------------------------------------- | ---------------------------- |
+ | String         | A string of characters.                                 | `std::string`                |
+ | StringView     | A lightweight view of a string.                         | `std::string_view`           |
+ | StringPair     | A pair of strings.                                      | `std::pair<std::string>`     |
+ | StringViewPair | A lightweight view of a string pair.                    | `std::pair<std::string_view>`|
 */
 
 /** A sequence of characters. */
 using String = std::string;
 
-/** A lightweight view of a string. (implemented using std::string_view) */
+/** A lightweight view of a string. */
 using StringView = std::string_view;
 
+/** A pair of strings. */
+using StringPair = std::pair<String, String>;
+
+/** A lightweight view of a string pair.*/
+using StringViewPair = std::pair<StringView, StringView>;
+
+/**
+ * Converts a boolean value to its corresponding string representation.
+ *
+ * @param value The boolean value to convert.
+ * @return The string representation of the boolean value.
+ */
+[[nodiscard]] constexpr inline StringView
+to_string(bool value) { return value ? "true" : "false"; }
 
 
 #endif // CONFIG_H_
