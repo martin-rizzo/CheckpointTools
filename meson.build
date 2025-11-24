@@ -28,7 +28,7 @@ project(
         'buildtype=debug',             # Default build type: debug
     ],
     subproject_dir: 'dependencies',    # Directory to search for subprojects
-    version: run_command('cat', 'VERSION').stdout().strip(),
+    version: run_command('cat', 'VERSION', check:true).stdout().strip(),
 )
 cpp = meson.get_compiler('cpp')    # Get the C++ compiler object
 subproject_dir  = 'dependencies'   # Directory where subprojects are located
