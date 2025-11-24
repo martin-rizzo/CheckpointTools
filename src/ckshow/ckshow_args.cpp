@@ -14,6 +14,7 @@
 #include <charconv> // for std::from_chars
 #include "common.h"
 #include "ckshow_args.h"
+#include "argument.h"
 #include "messages.h"
 
 
@@ -59,51 +60,47 @@ Usage: ckshow [OPTIONS] file
 {
     for( int i=1 ; i < argc ; ++i )
     {
-        auto option = parse_option(i, argc, argv);
-        auto arg    = get_name(option,i);
+        auto arg = Argument{i, argc, argv};
 
-        // parse the flags arguments
-        if( arg.starts_with('-') ) {
-        //-OPTIONS:
-            if     ( arg=="-n"  || arg=="--name"     ) { name    = get_value(option,i); }
-            else if( arg=="-m"  || arg=="--metadata" ) { command = Command::LIST_METADATA; }
-            else if(               arg=="--thumbnail") { command = Command::EXTRACT_THUMBNAIL; }
-            else if( arg=="-p"  || arg=="--prefix"   ) { prefix  = get_value(option,i); }
-            else if( arg=="-d"  || arg=="--depth"    ) { depth   = to_integer(get_value(option,i)); }
+        // parse the options
+        if( arg.is_option() ) {
+        //-COMMAND:
+            if     (arg.is( "-n", "--name"       )) { name    = arg.value(i); }
+            else if(arg.is( "-m", "--metadata"   )) { command = Command::LIST_METADATA; }
+            else if(arg.is(       "--thumbnail"  )) { command = Command::EXTRACT_THUMBNAIL; }
+            else if(arg.is( "-p", "--prefix"     )) { prefix  = arg.value(i); }
+            else if(arg.is( "-d", "--depth"      )) { depth   = to_integer(arg.value(i)); }
         //-FORMATS:
-            else if( arg=="-u"  || arg=="--human"    ) { format  = Format::HUMAN; }
-            else if( arg=="-b"  || arg=="--basic"    ) { format  = Format::PLAIN; }
-            else if( arg=="-j"  || arg=="--json"     ) { format  = Format::JSON; }
+            else if(arg.is( "-u", "--human"      )) { format = Format::HUMAN; }
+            else if(arg.is( "-b", "--basic"      )) { format = Format::PLAIN; }
+            else if(arg.is( "-j", "--json"       )) { format = Format::JSON;  }
         //-EXTRA:
-            else if( arg=="--nc"|| arg=="--no-color" ) { when_color = "never"; }
-            else if(               arg=="--color"    ) { when_color = get_value(option,i); }
-            else if( arg=="-h"  || arg=="--help"     ) { help = true; }
-            else if( arg=="-v"  || arg=="--version"  ) { version = true; }
+            else if(arg.is( "-h", "--help"       )) { help = true; }
+            else if(arg.is( "-v", "--version"    )) { version = true; }            
+            else if(arg.is( "--color"            )) { when_color = arg.value(i);  }
+            else if(arg.is( "--nc", "--no-color" )) { when_color = "never"; }
             else {
                 // if an unknown argument is encountered, display a fatal error message
-                Messages::fatal_error( "Unknown argument: " + String{arg}, {
+                Messages::fatal_error( "Unknown argument: " + arg.name(), {
                     "Try `ckshow --help` for more information." });
             }
             // check if the option's value starts with '=' (not consumed),
             // indicating user-provided value not expected by the option
-            if( option.second.starts_with('=') ) {
-                Messages::fatal_error( "The argument '"+ String{arg}+"' no expects a value and '"+String{option.second}+"' was provided.", {
+
+            // verificar si el usuario provide un valor pero este no fue consumido por la opcion
+            if( arg.has_value() && !arg.was_value_consumed() ) {
+                Messages::fatal_error( "The argument '"+ arg.name() +"' no expects a value and '"+ arg.value(i) +"' was provided.", {
                     "Try `ckshow --help` for more information." });
             }
         }
         // handle positional arguments, arguments without a preceding hyphen
         // (assume the positional argument is the filename)
         else {
-            if( filename.empty() ) { filename = arg;  }
+            if( filename.empty() ) { filename = arg.name();  }
             else {
-                Messages::fatal_error("Too many files specified.", {
-                    "You can only specify one file." });
+                Messages::fatal_error("Too many files specified, you can only specify one.", {
+                    "The additional file '" + arg.name() + "' is not required." });
             }
         }
     }
-
-    // salir del programa abrutamente
-    std::cout << (*this) << std::endl;
-    std::exit( 0 );
 }
-

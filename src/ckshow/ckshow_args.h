@@ -14,7 +14,6 @@
 #define CKSHOW_ARGS_H_
 #include <iostream>
 #include "common.h"
-#include "args.h"
 
 
 enum class Command {
@@ -47,7 +46,7 @@ inline String to_string(Format format) {
 }
 
 
-struct CkShowArgs : public Args
+struct CkShowArgs
 {
 // CONSTRUCTION/DESTRUCTION
 public:

@@ -8,7 +8,7 @@
 #subdir('<none>')
 app_dirs    += include_directories('.')
 app_sources += files(
-    'args.cpp',
+    'argument.cpp',
     'colors.cpp',
     'common.cpp',
     'messages.cpp',
