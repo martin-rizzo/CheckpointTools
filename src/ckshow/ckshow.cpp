@@ -10,6 +10,7 @@
 |      CLI tools for inspecting and manipulating model checkpoint files
 \_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _*/
 #include <tin/tensormap.h>
+#include <tin/tensortree.h>
 #include "colors.h"
 #include "messages.h"
 #include "ckshow.h"
@@ -74,6 +75,43 @@ CkShow::fatal_read_error(ReadError readError) {
 }
 
 //============================== SUBCOMMANDS ==============================//
+
+
+static void
+_print_node(std::ostream& os, const TensorTreeNode& node, const String& prefix = "") {
+
+    for( auto tensor: node.collect_tensors() ) {
+        os << tensor->name() << std::endl;
+    }
+
+    //os << "subnodes count: " << node.collect_subnodes().size() << std::endl;
+    //os << "tensors count:  " << node.collect_tensors().size() << std::endl;
+
+    for( auto subnode: node.collect_subnodes() ) {
+        os << subnode->name() << std::endl;
+        _print_node(os, *subnode);
+    }
+    
+#if 0
+    for( auto [tensorName, tensor]: node.tensors() ) {
+        os << prefix << "." << tensorName << std::endl;
+    }
+    for( auto [subnodeName, subnode]: node.subnodes() ) {
+        _print_tree_node(os, subnode, prefix + "." + subnodeName);
+    }
+#endif
+
+}
+
+
+void
+CkShow::list_tensors(const TensorMap& tensorMap) const {
+    TensorTree tensorTree{ tensorMap };
+
+    _print_node(std::cout, tensorTree.root());
+
+
+}
 
 void
 CkShow::list_tensors_columns(const TensorMap& tensorMap) const {
@@ -161,7 +199,7 @@ CkShow::run() {
         else                    { list_metadata(tensorMap); }
     } else {
         // print the names of all tensors in the file
-        list_tensors_csv(tensorMap);
+        list_tensors(tensorMap);
     }
 
     return 0;
