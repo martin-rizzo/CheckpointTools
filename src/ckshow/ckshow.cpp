@@ -9,8 +9,10 @@
 |                              CheckpointTools
 |      CLI tools for inspecting and manipulating model checkpoint files
 \_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _*/
+#include <format> // for std::format() [C++20]
 #include <tin/tensormap.h>
 #include <tin/tensortree.h>
+#include "table.h"
 #include "colors.h"
 #include "messages.h"
 #include "ckshow.h"
@@ -78,37 +80,57 @@ CkShow::fatal_read_error(ReadError readError) {
 
 
 static void
-_print_node(std::ostream& os, const TensorTreeNode& node) {
-    const auto& c = Colors::instance();
+_add_node_to_table(Table& table, const TensorTreeNode& node) {
 
-    const auto& nodeName = node.name();
+    //const auto& c = Colors::instance();
+    String nodeName = node.name();
 
     for( auto tensorPtr: node.tensor_pointers(SortBy::NAME) ) {
-        auto tensorName = tensorPtr->name();
-        auto tensorID   = tensorPtr->relative_name(nodeName);
-        auto shape      = tensorPtr->shape().to_string();
-        auto dtype      = tensorPtr->dtype().to_string();
-        if( !nodeName.empty() ) { os << c.primary() << " " << nodeName << "."; }
-        os << c.highlight() << tensorID << " ";
-        os << c.data()  << shape << " ";
-        os << c.data2() << dtype << c.reset() << std::endl;
+        String tensorName( tensorPtr->relative_name(nodeName) );
+        String shape     ( tensorPtr->shape().to_string()     );
+        String dtype     ( tensorPtr->dtype().to_string()     );
+
+        if( !nodeName.empty() ) { tensorName = nodeName + "|" + tensorName; }
+
+        table.add_row({ shape, dtype, tensorName });
+
+        // if( !nodeName.empty() ) { os << c.primary() << " " << nodeName << "."; }
+        // os << c.highlight() << tensorID << " ";
+        // os << c.data()  << shape << " ";
+        // os << c.data2() << dtype << c.reset() << std::endl;
     }
 
     for( auto subnodePtr: node.subnode_pointers(SortBy::NAME) ) {
-        os << c.group() << "/" << subnodePtr->name() << std::endl;
-        _print_node(os, *subnodePtr);
+        //os << c.group() << "/" << subnodePtr->name() << std::endl;
+        table.add_row({ "", "", subnodePtr->name() });
+        _add_node_to_table(table, *subnodePtr);
     }
 }
 
 
 void
 CkShow::list_tensors(const TensorMap& tensorMap) const {
+    using Align = Table::Align;
+
+    auto& c = Colors::instance();
     TensorTree tensorTree{ tensorMap };
     tensorTree.flatten_single_tensor_subnodes();
 
-    _print_node(std::cout, tensorTree.root());
-
-
+    Table table;
+    table.set_alignments({Align::RIGHT, Align::RIGHT, Align::LEFT});
+    table.set_max_widths({           0,            0,           0});
+    table.set_min_widths({           0,            0,           0});
+    // implementar el colorizador como un lambda que recibe index de columna y string y devuelve string
+    table.set_colorizer([c](int column, const String& text) {
+        switch( column ) {
+            case 0: return String(c.data())    + text + String(c.reset()); break;
+            case 1: return String(c.data2())   + text + String(c.reset()); break;
+            case 2: return String(c.primary()) + text + String(c.reset()); break;
+        }
+        return text;
+    });
+    _add_node_to_table(table, tensorTree.root());
+    std::cout << table << std::endl;
 }
 
 void

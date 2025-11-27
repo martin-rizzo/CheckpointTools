@@ -12,4 +12,5 @@ app_sources += files(
     'colors.cpp',
     'common.cpp',
     'messages.cpp',
+    'table.cpp',
 )
