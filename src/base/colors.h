@@ -13,7 +13,7 @@
 #pragma once
 #ifndef COLORS_H_
 #define COLORS_H_
-#include <string_view>
+#include <string>
 
 
 /**
@@ -65,23 +65,23 @@ public:
 
 // GETTING STYLE COLORS
 public:
-    [[nodiscard]] std::string_view primary()   const noexcept;
-    [[nodiscard]] std::string_view highlight() const noexcept;
-    [[nodiscard]] std::string_view group()     const noexcept;
-    [[nodiscard]] std::string_view data()      const noexcept;
-    [[nodiscard]] std::string_view data2()     const noexcept;
-    [[nodiscard]] std::string_view success()   const noexcept;
-    [[nodiscard]] std::string_view warning()   const noexcept;
-    [[nodiscard]] std::string_view error()     const noexcept;
-    [[nodiscard]] std::string_view info()      const noexcept;
-    [[nodiscard]] std::string_view reset()     const noexcept;
+    [[nodiscard]] const std::string& primary()   const noexcept;
+    [[nodiscard]] const std::string& highlight() const noexcept;
+    [[nodiscard]] const std::string& group()     const noexcept;
+    [[nodiscard]] const std::string& data()      const noexcept;
+    [[nodiscard]] const std::string& data2()     const noexcept;
+    [[nodiscard]] const std::string& success()   const noexcept;
+    [[nodiscard]] const std::string& warning()   const noexcept;
+    [[nodiscard]] const std::string& error()     const noexcept;
+    [[nodiscard]] const std::string& info()      const noexcept;
+    [[nodiscard]] const std::string& reset()     const noexcept;
 
 // GETTING SPECIFIC ANSI COLOR CODES
 public:
-    [[nodiscard]] std::string_view ansi_red()    const noexcept;
-    [[nodiscard]] std::string_view ansi_yellow() const noexcept;
-    [[nodiscard]] std::string_view ansi_green()  const noexcept;
-    [[nodiscard]] std::string_view ansi_cyan()   const noexcept;
+    [[nodiscard]] const std::string& ansi_red()    const noexcept;
+    [[nodiscard]] const std::string& ansi_yellow() const noexcept;
+    [[nodiscard]] const std::string& ansi_green()  const noexcept;
+    [[nodiscard]] const std::string& ansi_cyan()   const noexcept;
 
 // DISABLING COLORS
 public:
@@ -93,20 +93,20 @@ public:
 private:
     Colors() = default;
 private:
-    std::string_view _primary   { "\x1b[;37m"   };
-    std::string_view _highlight { "\x1b[;97m"   };
-    std::string_view _group     { "\x1b[;94m"   };
-    std::string_view _data      { "\x1b[;32m"   };
-    std::string_view _data2     { "\x1b[;33m"   };
-    std::string_view _success   { "\x1b[;1;32m" };
-    std::string_view _error     { "\x1b[;1;31m" };
-    std::string_view _info      { "\x1b[;1;34m" };
-    std::string_view _warning   { "\x1b[;1;33m" };
-    std::string_view _reset     { "\x1b[0m"    };
-    std::string_view _ansiRed   { "\x1b[;31m" };
-    std::string_view _ansiYellow{ "\x1b[;33m" };
-    std::string_view _ansiGreen { "\x1b[;32m" };
-    std::string_view _ansiCyan  { "\x1b[;36m" };
+    std::string _primary   { "\x1b[;37m"   };
+    std::string _highlight { "\x1b[;97m"   };
+    std::string _group     { "\x1b[;94m"   };
+    std::string _data      { "\x1b[;32m"   };
+    std::string _data2     { "\x1b[;33m"   };
+    std::string _success   { "\x1b[;1;32m" };
+    std::string _error     { "\x1b[;1;31m" };
+    std::string _info      { "\x1b[;1;34m" };
+    std::string _warning   { "\x1b[;1;33m" };
+    std::string _reset     { "\x1b[0m"     };
+    std::string _ansiRed   { "\x1b[;31m"   };
+    std::string _ansiYellow{ "\x1b[;33m"   };
+    std::string _ansiGreen { "\x1b[;32m"   };
+    std::string _ansiCyan  { "\x1b[;36m"   };
 };
 
 
@@ -116,7 +116,8 @@ private:
  * Returns the primary color.
  * @details This color is typically used as the main color throughout the output.
  */
-inline std::string_view Colors::primary() const noexcept { return _primary; }
+inline const std::string&
+Colors::primary() const noexcept { return _primary; }
 
 /**
  * Returns the highlight color.
@@ -124,78 +125,91 @@ inline std::string_view Colors::primary() const noexcept { return _primary; }
  *          elements within the output. It complements the primary color and
  *          helps to distinguish important details within the output.
  */
-inline std::string_view Colors::highlight() const noexcept { return _highlight; }
+inline const std::string&
+Colors::highlight() const noexcept { return _highlight; }
 
 /**
  * Returns the group text color.
  * @details This color is intended for representing groups of items, like
  *          directories, collections, etc., in a distinct way.
  */
-inline std::string_view Colors::group() const noexcept { return _group; }
+inline const std::string&
+Colors::group() const noexcept { return _group; }
 
 /**
  * Returns the data text color.
  * @details This color is used for displaying textual data such as values of
  *          variables, numerical information, etc.
  */
-inline std::string_view Colors::data() const noexcept { return _data; }
+inline const std::string&
+Colors::data() const noexcept { return _data; }
 
 /**
  * Returns an alternative data text color.
  * @details Similar to the 'data()' method but provides a different shade for
  *          variety in displaying textual data values.
  */
-inline std::string_view Colors::data2() const noexcept { return _data2; }
+inline const std::string&
+Colors::data2() const noexcept { return _data2; }
 
 /**
  * Returns the success indicator color.
  * @details This color is used to denote successful operations or positive
  *          outcomes in the application.
  */
-inline std::string_view Colors::success() const noexcept { return _success; }
+inline const std::string&
+Colors::success() const noexcept { return _success; }
 
 /**
  * Returns the error indicator color.
  * @details This color signifies that an operation has failed or there's a
  *          problem, alerting users to potential issues.
  */
-inline std::string_view Colors::error() const noexcept { return _error; }
+inline const std::string&
+Colors::error() const noexcept { return _error; }
 
 /**
  * Returns the informational text color.
  * @details This color is used for providing general information or explanatory
  *          messages to the user.
  */
-inline std::string_view Colors::info() const noexcept { return _info; }
+inline const std::string&
+Colors::info() const noexcept { return _info; }
 
 /**
  * Returns the warning text color.
  * @details Represents cautionary or advisory messages that may require user
  *          attention but are not critical errors.
  */
-inline std::string_view Colors::warning() const noexcept { return _warning; }
+inline const std::string&
+Colors::warning() const noexcept { return _warning; }
 
 /**
  * Returns the ANSI code that reset any applied text styles to default.
  * @details This is useful for ending a series of colored text, ensuring the
  *          following text appears in the standard format.
  */
-inline std::string_view Colors::reset() const noexcept { return _reset; }
+inline const std::string&
+Colors::reset() const noexcept { return _reset; }
 
 
 //================== INLINES: SPECIFIC ANSI COLOR CODES ===================//
 
 /** Returns the ansi code for red */
-inline std::string_view Colors::ansi_red() const noexcept { return _ansiRed; }
+inline const std::string&
+Colors::ansi_red() const noexcept { return _ansiRed; }
 
 /** Returns the ansi code for yellow */
-inline std::string_view Colors::ansi_yellow() const noexcept { return _ansiYellow; }
+inline const std::string&
+Colors::ansi_yellow() const noexcept { return _ansiYellow; }
 
 /** Returns the ansi code for green */
-inline std::string_view Colors::ansi_green() const noexcept { return _ansiGreen; }
+inline const std::string&
+Colors::ansi_green() const noexcept { return _ansiGreen; }
 
 /** Returns the ansi code for cyan */
-inline std::string_view Colors::ansi_cyan() const noexcept { return _ansiCyan; }
+inline const std::string&
+Colors::ansi_cyan() const noexcept { return _ansiCyan; }
 
 
 #endif // COLORS_H_

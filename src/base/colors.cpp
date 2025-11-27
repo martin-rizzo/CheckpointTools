@@ -38,10 +38,10 @@ Colors::instance() noexcept {
  */
 void
 Colors::disable_colors() noexcept {
-    _primary = _highlight = _group = _success = _warning = _error = _info = \
-    _reset = _ansiRed = _ansiYellow = _ansiGreen = _ansiCyan = "";
+    _primary = _highlight = _group = _data = _data2 = \
+    _success = _error = _info = _warning = _reset = \
+    _ansiRed = _ansiYellow = _ansiGreen = _ansiCyan = "";
 }
-
 
 /**
  * Check if color codes are enabled

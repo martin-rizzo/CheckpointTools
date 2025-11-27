@@ -80,9 +80,7 @@ CkShow::fatal_read_error(ReadError readError) {
 
 
 static void
-_add_node_to_table(Table& table, const TensorTreeNode& node) {
-
-    //const auto& c = Colors::instance();
+_fill_table_recursively(Table& table, const TensorTreeNode& node) {
     String nodeName = node.name();
 
     for( auto tensorPtr: node.tensor_pointers(SortBy::NAME) ) {
@@ -91,19 +89,12 @@ _add_node_to_table(Table& table, const TensorTreeNode& node) {
         String dtype     ( tensorPtr->dtype().to_string()     );
 
         if( !nodeName.empty() ) { tensorName = nodeName + "|" + tensorName; }
-
         table.add_row({ shape, dtype, tensorName });
-
-        // if( !nodeName.empty() ) { os << c.primary() << " " << nodeName << "."; }
-        // os << c.highlight() << tensorID << " ";
-        // os << c.data()  << shape << " ";
-        // os << c.data2() << dtype << c.reset() << std::endl;
     }
 
     for( auto subnodePtr: node.subnode_pointers(SortBy::NAME) ) {
-        //os << c.group() << "/" << subnodePtr->name() << std::endl;
         table.add_row({ "", "", subnodePtr->name() });
-        _add_node_to_table(table, *subnodePtr);
+        _fill_table_recursively(table, *subnodePtr);
     }
 }
 
@@ -121,15 +112,15 @@ CkShow::list_tensors(const TensorMap& tensorMap) const {
     table.set_max_widths({           0,            0,           0});
     table.set_min_widths({           0,            0,           0});
     // implementar el colorizador como un lambda que recibe index de columna y string y devuelve string
-    table.set_colorizer([c](int column, const String& text) {
+    table.set_colorizer([&c](int column, const String& text) {
         switch( column ) {
-            case 0: return String(c.data())    + text + String(c.reset()); break;
-            case 1: return String(c.data2())   + text + String(c.reset()); break;
-            case 2: return String(c.primary()) + text + String(c.reset()); break;
+            case 0: return c.data()    + text + c.reset(); break;
+            case 1: return c.data2()   + text + c.reset(); break;
+            case 2: return c.primary() + text + c.reset(); break;
         }
         return text;
     });
-    _add_node_to_table(table, tensorTree.root());
+    _fill_table_recursively(table, tensorTree.root());
     std::cout << table << std::endl;
 }
 
