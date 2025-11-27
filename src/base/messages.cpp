@@ -27,7 +27,7 @@
 void
 Messages::warning(Text message) {
     auto c = Colors::instance();
-    std::cerr << c.cyan() << "[WARNING]" << c.reset() << " " << message << std::endl;
+    std::cerr << c.warning() << "[WARNING]" << c.reset() << " " << message << std::endl;
 }
 
 /**
@@ -41,7 +41,7 @@ Messages::warning(Text message) {
 void
 Messages::error(Text message) {
     auto c = Colors::instance();
-    std::cerr << c.red() << "[ERROR]" << c.reset() << " " << message << std::endl;
+    std::cerr << c.error() << "[ERROR]" << c.reset() << " " << message << std::endl;
 }
 
 /**
@@ -71,7 +71,7 @@ Messages::fatal_error(Text message,
     // Print additional messages if any
     auto c = Colors::instance();
     for (const auto& info : infoMessages) {
-        std::cerr << " " << c.cyan() << "\xF0\x9F\x9B\x88 " << info << c.reset() << std::endl;
+        std::cerr << " " << c.info() << "\xF0\x9F\x9B\x88 " << info << c.reset() << std::endl;
     }
     std::exit( exitCode>=1 ? exitCode : 1 );
 }

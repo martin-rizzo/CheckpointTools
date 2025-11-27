@@ -55,14 +55,23 @@ public:
     Colors& operator=(Colors&&) noexcept = default;
     ~Colors() = default;
 
-// GETTING COLORS
+// GETTING STYLE COLORS
 public:
-    [[nodiscard]] std::string_view red()    const noexcept;
-    [[nodiscard]] std::string_view yellow() const noexcept;
-    [[nodiscard]] std::string_view green()  const noexcept;
-    [[nodiscard]] std::string_view cyan()   const noexcept;
-    [[nodiscard]] std::string_view reset()  const noexcept;
-    [[nodiscard]] std::string_view get_color_code(const std::string_view& colorName) const noexcept;
+    [[nodiscard]] std::string_view primary()   const noexcept;
+    [[nodiscard]] std::string_view secondary() const noexcept;
+    [[nodiscard]] std::string_view highlight() const noexcept;
+    [[nodiscard]] std::string_view success()   const noexcept;
+    [[nodiscard]] std::string_view warning()   const noexcept;
+    [[nodiscard]] std::string_view error()     const noexcept;
+    [[nodiscard]] std::string_view info()      const noexcept;
+    [[nodiscard]] std::string_view reset()     const noexcept;
+
+// GETTING SPECIFIC ANSI COLOR CODES
+public:
+    [[nodiscard]] std::string_view ansi_red()    const noexcept;
+    [[nodiscard]] std::string_view ansi_yellow() const noexcept;
+    [[nodiscard]] std::string_view ansi_green()  const noexcept;
+    [[nodiscard]] std::string_view ansi_cyan()   const noexcept;
 
 // DISABLING COLORS
 public:
@@ -74,29 +83,62 @@ public:
 private:
     Colors() = default;
 private:
-    const char* _red   { "\x1b[91m" };
-    const char* _yellow{ "\x1b[93m" };
-    const char* _green { "\x1b[92m" };
-    const char* _cyan  { "\x1b[96m" };
-    const char* _reset { "\x1b[0m"  };
+    std::string_view _primary   { "\x1b[35m" };   // Magenta color
+    std::string_view _secondary { "\x1b[36m" };   // Cyan color
+    std::string_view _highlight { "\x1b[44m" };   // Blue background
+    std::string_view _success   { "\x1b[32m" };   // Green text
+    std::string_view _warning   { "\x1b[33m" };   // Yellow text
+    std::string_view _error     { "\x1b[31m" };   // Red text
+    std::string_view _info      { "\x1b[34m" };   // Blue text
+    std::string_view _reset     { "\x1b[0m"  };   // Reset all previous colors
+    std::string_view _ansiRed   { "\x1b[91m" };
+    std::string_view _ansiYellow{ "\x1b[93m" };
+    std::string_view _ansiGreen { "\x1b[92m" };
+    std::string_view _ansiCyan  { "\x1b[96m" };
 };
 
-//================================ INLINES ================================//
 
-/** Returns the red color code */
-inline std::string_view Colors::red() const noexcept { return _red; }
+//===================== INLINES: GETTING STYLE COLORS =====================//
 
-/** Returns the yellow color code */
-inline std::string_view Colors::yellow() const noexcept { return _yellow; }
+/** Returns the primary color code */
+inline std::string_view Colors::primary() const noexcept { return _primary; }
 
-/** Returns the green color code */
-inline std::string_view Colors::green() const noexcept { return _green; }
+/** Returns the secondary color code */
+inline std::string_view Colors::secondary() const noexcept { return _secondary; }
 
-/** Returns the cyan color code */
-inline std::string_view Colors::cyan() const noexcept { return _cyan; }
+/** Returns the highlight color code */
+inline std::string_view Colors::highlight() const noexcept { return _highlight; }
+
+/** Returns the success color code */
+inline std::string_view Colors::success() const noexcept { return _success; }
+
+/** Returns the warning color code */
+inline std::string_view Colors::warning() const noexcept { return _warning; }
+
+/** Returns the error color code */
+inline std::string_view Colors::error() const noexcept { return _error; }
+
+/** Returns the info color code */
+inline std::string_view Colors::info() const noexcept { return _info; }
 
 /** Returns the color code that resets the color */
 inline std::string_view Colors::reset() const noexcept { return _reset; }
+
+
+//================== INLINES: SPECIFIC ANSI COLOR CODES ===================//
+
+/** Returns the red color code */
+inline std::string_view Colors::ansi_red() const noexcept { return _ansiRed; }
+
+/** Returns the yellow color code */
+inline std::string_view Colors::ansi_yellow() const noexcept { return _ansiYellow; }
+
+/** Returns the green color code */
+inline std::string_view Colors::ansi_green() const noexcept { return _ansiGreen; }
+
+/** Returns the cyan color code */
+inline std::string_view Colors::ansi_cyan() const noexcept { return _ansiCyan; }
+
 
 
 #endif // COLORS_H_

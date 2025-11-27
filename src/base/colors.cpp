@@ -14,6 +14,7 @@
 #include <memory>  // for std::unique_ptr
 #include "colors.h"
 
+//=============================== SINGLETON ===============================//
 
 /**
  * Returns a reference to the singleton instance of Colors.
@@ -30,26 +31,15 @@ Colors::instance() noexcept {
     return *instancePtr;
 }
 
-/**
- * Get color code by name
- * @param colorName Name of the color (red, yellow, green, cyan)
- * @return The ANSI code for the specified color or "reset code" if color name is not found.
- */
-std::string_view
-Colors::get_color_code(const std::string_view& colorName) const noexcept {
-    if (colorName == "red"   ) { return red();    }
-    if (colorName == "yellow") { return yellow(); }
-    if (colorName == "green" ) { return green();  }
-    if (colorName == "cyan"  ) { return cyan();   }
-    return reset();
-}
+//=========================== DISABLING COLORS ============================//
 
 /**
  * Disable all colors
  */
 void
 Colors::disable_colors() noexcept {
-    _red = _yellow = _green = _cyan = _reset = "";
+    _primary = _secondary = _highlight = _success = _warning = _error = _info = \
+    _reset = _ansiRed = _ansiYellow = _ansiGreen = _ansiCyan = "";
 }
 
 
@@ -59,5 +49,5 @@ Colors::disable_colors() noexcept {
  */
 bool
 Colors::are_colors_enabled() const noexcept {
-    return _red[0] != '\0';
+    return !_ansiRed.empty() || !_ansiGreen.empty();
 }
