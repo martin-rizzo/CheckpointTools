@@ -78,35 +78,33 @@ CkShow::fatal_read_error(ReadError readError) {
 
 
 static void
-_print_node(std::ostream& os, const TensorTreeNode& node, const String& prefix = "") {
+_print_node(std::ostream& os, const TensorTreeNode& node) {
+    const auto& c = Colors::instance();
 
-    for( auto tensor: node.collect_tensors() ) {
-        os << tensor->name() << std::endl;
+    const auto& nodeName = node.name();
+
+    for( auto tensorPtr: node.tensor_pointers(SortBy::NAME) ) {
+        auto tensorName = tensorPtr->name();
+        auto tensorID   = tensorPtr->relative_name(nodeName);
+        auto shape      = tensorPtr->shape().to_string();
+        auto dtype      = tensorPtr->dtype().to_string();
+        if( !nodeName.empty() ) { os << c.primary() << " " << nodeName << "."; }
+        os << c.highlight() << tensorID << " ";
+        os << c.data()  << shape << " ";
+        os << c.data2() << dtype << c.reset() << std::endl;
     }
 
-    //os << "subnodes count: " << node.collect_subnodes().size() << std::endl;
-    //os << "tensors count:  " << node.collect_tensors().size() << std::endl;
-
-    for( auto subnode: node.collect_subnodes() ) {
-        os << subnode->name() << std::endl;
-        _print_node(os, *subnode);
+    for( auto subnodePtr: node.subnode_pointers(SortBy::NAME) ) {
+        os << c.group() << "/" << subnodePtr->name() << std::endl;
+        _print_node(os, *subnodePtr);
     }
-    
-#if 0
-    for( auto [tensorName, tensor]: node.tensors() ) {
-        os << prefix << "." << tensorName << std::endl;
-    }
-    for( auto [subnodeName, subnode]: node.subnodes() ) {
-        _print_tree_node(os, subnode, prefix + "." + subnodeName);
-    }
-#endif
-
 }
 
 
 void
 CkShow::list_tensors(const TensorMap& tensorMap) const {
     TensorTree tensorTree{ tensorMap };
+    tensorTree.flatten_single_tensor_subnodes();
 
     _print_node(std::cout, tensorTree.root());
 
@@ -115,7 +113,7 @@ CkShow::list_tensors(const TensorMap& tensorMap) const {
 
 void
 CkShow::list_tensors_columns(const TensorMap& tensorMap) const {
-    auto sortedTensors = tensorMap.collect_tensors(SortBy::NAME_AND_INDEX);
+    auto sortedTensors = tensorMap.collect_tensors(SortBy::NAME);
 
     size_t nameMaxLen = 0, shapeMaxLen = 0;
     for(const auto& tensor : sortedTensors) {
@@ -135,7 +133,7 @@ CkShow::list_tensors_columns(const TensorMap& tensorMap) const {
 
 void
 CkShow::list_tensors_csv(const TensorMap& tensorMap, bool includeHeader /* = true */) const {
-    auto sortedTensors = tensorMap.collect_tensors(SortBy::NAME_AND_INDEX);
+    auto sortedTensors = tensorMap.collect_tensors(SortBy::NAME);
     if(includeHeader) {
         std::cout << "name,shape,dtype" << std::endl;
     }
@@ -190,9 +188,9 @@ CkShow::run() {
     auto tensorMap = TensorMap::from_file(_args.filename, readError);
     if(readError != ReadError::None) { fatal_read_error(readError); }
 
-    std::cout << std::endl;
-    std::cout << _args << std::endl;
-    std::cout << std::endl;
+    // std::cout << std::endl;
+    // std::cout << _args << std::endl;
+    // std::cout << std::endl;
 
     if(_args.command == Command::LIST_METADATA) {
         if(!_args.name.empty()) { print_metadata(tensorMap, _args.name); }
