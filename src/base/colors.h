@@ -1,7 +1,7 @@
 /*
 | File    : colors.h
 | Purpose : A class for handling terminal colors.
-|           This class is a singleton and can be accessed through the instance() method.
+|           This class is a singleton and can be accessed through the `Colors::instance()` method.
 | Author  : Martin Rizzo | <martinrizzo@gmail.com>
 | Date    : Nov 20, 2025
 | Repo    : https://github.com/martin-rizzo/CheckpointTools
@@ -26,16 +26,24 @@
  * Example usage:
  * @code{.cpp}
  * #include <iostream>
+ * #include "colors.h"
  *
  * int main() {
- *     auto c = Colors::instance();
+ *     auto& c = Colors::instance();
  *
- *     std::cout << c.red()   << "This is red text" << c.reset()   << std::endl;
- *     std::cout << c.green() << "This is green text" << c.reset() << std::endl;
- *
+ *     std::cout << c.primary()   << "This is primary colored text"        << c.reset() << std::endl;
+ *     std::cout << c.highlight() << "This is highlighted important info"  << c.reset() << std::endl;
+ *     std::cout << c.group()     << "This represents a group of items"    << c.reset() << std::endl;
+ *     std::cout << c.data()      << "Displaying some data here"           << c.reset() << std::endl;
+ *     std::cout << c.data2()     << "Alternative shade for data display"  << c.reset() << std::endl;
+ *     std::cout << c.success()   << "Operation succeeded!"                << c.reset() << std::endl;
+ *     std::cout << c.warning()   << "Something to be aware of"            << c.reset() << std::endl;
+ *     std::cout << c.error()     << "There was an error, please fix it."  << c.reset() << std::endl;
+ *     std::cout << c.info()      << "General information is here"         << c.reset() << std::endl;
+ * 
  *     // Disable color output
  *     c.disable_colors();
- *     std::cout << c.red() << "This will not be colored" << c.reset() << std::endl;
+ *     std::cout << c.success() << "This will not be colored" << c.reset() << std::endl;
  *
  *     return 0;
  * }
@@ -58,8 +66,10 @@ public:
 // GETTING STYLE COLORS
 public:
     [[nodiscard]] std::string_view primary()   const noexcept;
-    [[nodiscard]] std::string_view secondary() const noexcept;
     [[nodiscard]] std::string_view highlight() const noexcept;
+    [[nodiscard]] std::string_view group()     const noexcept;
+    [[nodiscard]] std::string_view data()      const noexcept;
+    [[nodiscard]] std::string_view data2()     const noexcept;
     [[nodiscard]] std::string_view success()   const noexcept;
     [[nodiscard]] std::string_view warning()   const noexcept;
     [[nodiscard]] std::string_view error()     const noexcept;
@@ -83,62 +93,109 @@ public:
 private:
     Colors() = default;
 private:
-    std::string_view _primary   { "\x1b[35m" };   // Magenta color
-    std::string_view _secondary { "\x1b[36m" };   // Cyan color
-    std::string_view _highlight { "\x1b[44m" };   // Blue background
-    std::string_view _success   { "\x1b[32m" };   // Green text
-    std::string_view _warning   { "\x1b[33m" };   // Yellow text
-    std::string_view _error     { "\x1b[31m" };   // Red text
-    std::string_view _info      { "\x1b[34m" };   // Blue text
-    std::string_view _reset     { "\x1b[0m"  };   // Reset all previous colors
-    std::string_view _ansiRed   { "\x1b[91m" };
-    std::string_view _ansiYellow{ "\x1b[93m" };
-    std::string_view _ansiGreen { "\x1b[92m" };
-    std::string_view _ansiCyan  { "\x1b[96m" };
+    std::string_view _primary   { "\x1b[;37m"   };
+    std::string_view _highlight { "\x1b[;97m"   };
+    std::string_view _group     { "\x1b[;94m"   };
+    std::string_view _data      { "\x1b[;32m"   };
+    std::string_view _data2     { "\x1b[;33m"   };
+    std::string_view _success   { "\x1b[;1;32m" };
+    std::string_view _error     { "\x1b[;1;31m" };
+    std::string_view _info      { "\x1b[;1;34m" };
+    std::string_view _warning   { "\x1b[;1;33m" };
+    std::string_view _reset     { "\x1b[0m"    };
+    std::string_view _ansiRed   { "\x1b[;31m" };
+    std::string_view _ansiYellow{ "\x1b[;33m" };
+    std::string_view _ansiGreen { "\x1b[;32m" };
+    std::string_view _ansiCyan  { "\x1b[;36m" };
 };
 
 
 //===================== INLINES: GETTING STYLE COLORS =====================//
 
-/** Returns the primary color code */
+/**
+ * Returns the primary color.
+ * @details This color is typically used as the main color throughout the output.
+ */
 inline std::string_view Colors::primary() const noexcept { return _primary; }
 
-/** Returns the secondary color code */
-inline std::string_view Colors::secondary() const noexcept { return _secondary; }
-
-/** Returns the highlight color code */
+/**
+ * Returns the highlight color.
+ * @details This color is used to emphasize or draw attention to specific
+ *          elements within the output. It complements the primary color and
+ *          helps to distinguish important details within the output.
+ */
 inline std::string_view Colors::highlight() const noexcept { return _highlight; }
 
-/** Returns the success color code */
+/**
+ * Returns the group text color.
+ * @details This color is intended for representing groups of items, like
+ *          directories, collections, etc., in a distinct way.
+ */
+inline std::string_view Colors::group() const noexcept { return _group; }
+
+/**
+ * Returns the data text color.
+ * @details This color is used for displaying textual data such as values of
+ *          variables, numerical information, etc.
+ */
+inline std::string_view Colors::data() const noexcept { return _data; }
+
+/**
+ * Returns an alternative data text color.
+ * @details Similar to the 'data()' method but provides a different shade for
+ *          variety in displaying textual data values.
+ */
+inline std::string_view Colors::data2() const noexcept { return _data2; }
+
+/**
+ * Returns the success indicator color.
+ * @details This color is used to denote successful operations or positive
+ *          outcomes in the application.
+ */
 inline std::string_view Colors::success() const noexcept { return _success; }
 
-/** Returns the warning color code */
-inline std::string_view Colors::warning() const noexcept { return _warning; }
-
-/** Returns the error color code */
+/**
+ * Returns the error indicator color.
+ * @details This color signifies that an operation has failed or there's a
+ *          problem, alerting users to potential issues.
+ */
 inline std::string_view Colors::error() const noexcept { return _error; }
 
-/** Returns the info color code */
+/**
+ * Returns the informational text color.
+ * @details This color is used for providing general information or explanatory
+ *          messages to the user.
+ */
 inline std::string_view Colors::info() const noexcept { return _info; }
 
-/** Returns the color code that resets the color */
+/**
+ * Returns the warning text color.
+ * @details Represents cautionary or advisory messages that may require user
+ *          attention but are not critical errors.
+ */
+inline std::string_view Colors::warning() const noexcept { return _warning; }
+
+/**
+ * Returns the ANSI code that reset any applied text styles to default.
+ * @details This is useful for ending a series of colored text, ensuring the
+ *          following text appears in the standard format.
+ */
 inline std::string_view Colors::reset() const noexcept { return _reset; }
 
 
 //================== INLINES: SPECIFIC ANSI COLOR CODES ===================//
 
-/** Returns the red color code */
+/** Returns the ansi code for red */
 inline std::string_view Colors::ansi_red() const noexcept { return _ansiRed; }
 
-/** Returns the yellow color code */
+/** Returns the ansi code for yellow */
 inline std::string_view Colors::ansi_yellow() const noexcept { return _ansiYellow; }
 
-/** Returns the green color code */
+/** Returns the ansi code for green */
 inline std::string_view Colors::ansi_green() const noexcept { return _ansiGreen; }
 
-/** Returns the cyan color code */
+/** Returns the ansi code for cyan */
 inline std::string_view Colors::ansi_cyan() const noexcept { return _ansiCyan; }
-
 
 
 #endif // COLORS_H_

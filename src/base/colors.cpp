@@ -1,7 +1,7 @@
 /*
 | File    : colors.cpp
 | Purpose : A class for handling terminal colors.
-|           This class is a singleton and can be accessed through the instance() method.
+|           This class is a singleton and can be accessed through the `Colors::instance()` method.
 | Author  : Martin Rizzo | <martinrizzo@gmail.com>
 | Date    : Nov 20, 2025
 | Repo    : https://github.com/martin-rizzo/CheckpointTools
@@ -38,7 +38,7 @@ Colors::instance() noexcept {
  */
 void
 Colors::disable_colors() noexcept {
-    _primary = _secondary = _highlight = _success = _warning = _error = _info = \
+    _primary = _highlight = _group = _success = _warning = _error = _info = \
     _reset = _ansiRed = _ansiYellow = _ansiGreen = _ansiCyan = "";
 }
 
