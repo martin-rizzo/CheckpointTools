@@ -34,6 +34,40 @@ CkShow::CkShow(const CkShowArgs& args)
 
 //================================ HELPERS ================================//
 
+const String&
+CkShow::to_string(tin::StorageType storageType) const noexcept {
+    static const String unknown = " ??? ";
+    static const std::unordered_map<tin::StorageType, String> map = {
+        {tin::StorageType::BOOL,             " bol "},
+        {tin::StorageType::INT8,             " i08 "},
+        {tin::StorageType::INT16,            " i16 "},
+        {tin::StorageType::INT32,            " i32 "},
+        {tin::StorageType::INT64,            " i64 "},
+        {tin::StorageType::UINT8,            " u08 "},
+        {tin::StorageType::UINT16,           " u16 "},
+        {tin::StorageType::UINT32,           " u32 "},
+        {tin::StorageType::UINT64,           " u64 "},
+        {tin::StorageType::FLOAT32,          " f32 "},
+        {tin::StorageType::FLOAT64,          " f64 "},
+        {tin::StorageType::STRING,           " str "},
+        {tin::StorageType::ARRAY_OF_BOOLS,   "[bol]"},
+        {tin::StorageType::ARRAY_OF_INT8,    "[i08]"},
+        {tin::StorageType::ARRAY_OF_INT16,   "[i16]"},
+        {tin::StorageType::ARRAY_OF_INT32,   "[i32]"},
+        {tin::StorageType::ARRAY_OF_INT64,   "[i64]"},
+        {tin::StorageType::ARRAY_OF_UINT8,   "[u08]"},
+        {tin::StorageType::ARRAY_OF_UINT16,  "[u16]"},
+        {tin::StorageType::ARRAY_OF_UINT32,  "[u32]"},
+        {tin::StorageType::ARRAY_OF_UINT64,  "[u64]"},
+        {tin::StorageType::ARRAY_OF_FLOAT32, "[f32]"},
+        {tin::StorageType::ARRAY_OF_FLOAT64, "[f64]"},
+        {tin::StorageType::ARRAY_OF_STRINGS, "[str]"},
+        {tin::StorageType::ARRAY_OF_ARRAYS,  "[[*]]"}
+    };
+    auto it = map.find(storageType);
+    return it != map.end() ? it->second : unknown;
+}
+
 void
 CkShow::print_help() const noexcept {
     std::cout << _args.help_message  << std::endl;
@@ -158,10 +192,38 @@ CkShow::list_tensors_csv(const TensorMap& tensorMap, bool includeHeader /* = tru
 
 void
 CkShow::list_metadata(const TensorMap& tensorMap) const {
-    std::cout << "Metadata:" << std::endl;
-    for(auto& it : tensorMap.metadata()) {
-        std::cout << "  " << it.first << ": " << it.second.as_string() << std::endl;
+    static const int MaxWidth = 50;
+
+    Table table;
+    auto& c = Colors::instance();
+    table.set_colorizer([&c](int column, const String& text) {
+        switch( column ) {
+            case 0: return c.data2()   + text + c.reset(); break;
+            case 1: return c.primary() + text + c.reset(); break;
+            case 2: return c.data()    + text + c.reset(); break;
+        }
+        return text;
+    });
+
+    // extraer key y variant
+    for( const auto& [key, variant]: tensorMap.metadata()) {
+        auto value = variant.as_string();
+        auto type  = to_string( variant.storage_type() );
+
+        // recortar value y agregar "..." si es necesario
+        if( value.length() > MaxWidth ) { value = value.substr(0, MaxWidth-3) + "...";  }
+
+        // tranformar todos los /n en espacios
+        std::transform(value.begin(), value.end(), value.begin(),
+            [](unsigned char c) -> unsigned char {
+                if (c == '\n' || c == '\r' || c == '\t') { return ' '; }
+                return c;
+            });        
+
+
+        table.add_row({type, key+":", value});
     }
+    std::cout << table << std::endl;
 }
 
 void

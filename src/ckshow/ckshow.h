@@ -36,6 +36,7 @@ public:
 
 // HELPERS
 public:
+    const String& to_string(tin::StorageType storageType) const noexcept;
     void print_help() const noexcept;
     void print_version() const noexcept;
     [[noreturn]] static void fatal_read_error(ReadError error);
